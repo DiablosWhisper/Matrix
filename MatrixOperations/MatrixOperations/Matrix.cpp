@@ -3,9 +3,6 @@
 #include <iomanip>
 using namespace std;
 
-/*TODO LIST*/
-//Add simmetrical matrix filling method
-
 class Matrix
 {
 private:
