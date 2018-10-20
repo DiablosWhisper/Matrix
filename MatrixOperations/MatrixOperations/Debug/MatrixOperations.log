@@ -1,0 +1,6 @@
+﻿  Matrix.cpp
+c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(77): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(90): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(331): warning C4326: return type of 'main' should be 'int' instead of 'void'
+  LINK : C:\Users\Gleb\source\repos\Matrix\MatrixOperations\Debug\MatrixOperations.exe not found or not built by the last incremental link; performing full link
+  MatrixOperations.vcxproj -> C:\Users\Gleb\source\repos\Matrix\MatrixOperations\Debug\MatrixOperations.exe
