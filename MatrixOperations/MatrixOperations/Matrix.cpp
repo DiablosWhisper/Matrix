@@ -242,7 +242,16 @@ public:
 		{
 			for (int CoordinateY = 0; CoordinateY < Matrix.LengthOfMatrix; CoordinateY++)
 			{
-				OutputStream << setw(4) << Matrix.SquareMatrix[CoordinateX][CoordinateY] << " ";
+				OutputStream << setw(3) << setprecision(3) << Matrix.SquareMatrix[CoordinateX][CoordinateY] << "*x" << CoordinateY;
+
+				if (CoordinateY < Matrix.LengthOfMatrix - 1)
+				{
+					OutputStream << setw(3) << setprecision(3) << " + ";
+				}
+				else if(CoordinateY == Matrix.LengthOfMatrix - 1)
+				{
+					OutputStream << setw(3) << setprecision(3) << "=" <<Matrix.SquareMatrix[CoordinateX][CoordinateY];
+				}
 			}
 
 			OutputStream << endl;
@@ -326,7 +335,7 @@ void GaussMethod(const Matrix& UserMatrix)
 
 void main()
 {
-	Matrix UserMatrix(4);
+	Matrix UserMatrix(7);
 
 	UserMatrix.SimmetricalMatrixFilling();
 
