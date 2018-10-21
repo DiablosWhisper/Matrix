@@ -59,16 +59,6 @@ public:
 		return HeightOfMatrix;
 	}
 
-	void DisposeMatrix(const Matrix& Matrix)
-	{
-		for (int CoordinateX = 0; CoordinateX < Matrix.HeightOfMatrix; CoordinateX++)
-		{
-			delete[] Matrix.SquareMatrix[CoordinateX];
-		}
-
-		delete[] Matrix.SquareMatrix;
-	}
-
 	void AsimmetricalMatrixFilling()
 	{
 		srand(time(0));
@@ -111,13 +101,19 @@ public:
 
 	Matrix operator ~ ()
 	{
-		double** AxiliaryMatrix = SquareMatrix;
-
 		for (int CoordinateX = 0; CoordinateX < HeightOfMatrix; CoordinateX++)
 		{
-			for (int CoordinateY = 0; CoordinateY < LengthOfMatrix; CoordinateY++)
+			for (int CoordinateY = CoordinateX + 1; CoordinateY < HeightOfMatrix - CoordinateX; CoordinateY++)
 			{
-				SquareMatrix[CoordinateY][CoordinateX - 1 - CoordinateX] = AxiliaryMatrix[CoordinateX][CoordinateY];
+				int Buffer = SquareMatrix[CoordinateY][HeightOfMatrix - CoordinateX - 1];
+
+				SquareMatrix[CoordinateY][HeightOfMatrix - CoordinateX - 1] = SquareMatrix[CoordinateX][CoordinateY];
+
+				SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[HeightOfMatrix - CoordinateY - 1][CoordinateX];
+
+				SquareMatrix[HeightOfMatrix - CoordinateY - 1][CoordinateX] = SquareMatrix[HeightOfMatrix - 1 - CoordinateX][HeightOfMatrix - 1 - CoordinateY];
+
+				SquareMatrix[HeightOfMatrix - 1 - CoordinateX][HeightOfMatrix - 1 - CoordinateY] = Buffer;
 			}
 		}
 
@@ -126,17 +122,15 @@ public:
 
 	Matrix operator * (const double Coefficient)
 	{
-		Matrix MultiplicationOfMatrix(HeightOfMatrix);
-
 		for (int CoordinateX = 0; CoordinateX < HeightOfMatrix; CoordinateX++)
 		{
 			for (int CoordinateY = 0; CoordinateY < LengthOfMatrix; CoordinateY++)
 			{
-				MultiplicationOfMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] * Coefficient;
+				SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] * Coefficient;
 			}
 		}
 
-		return MultiplicationOfMatrix;
+		return *this;
 	}
 
 	Matrix operator = (const Matrix& SecondMatrix)
@@ -157,27 +151,25 @@ public:
 
 		LengthOfMatrix = SecondMatrix.LengthOfMatrix;
 
-		return SecondMatrix;
+		return *this;
 	}
 
 	Matrix operator * (const Matrix& SecondMatrix)
 	{
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
-			Matrix MultilpicationOfMatrix(SecondMatrix.HeightOfMatrix);
-
-			for (int AdditionalCoordinate = 0; AdditionalCoordinate < SecondMatrix.HeightOfMatrix; AdditionalCoordinate++)
+			for (int CoordinateX = 0; CoordinateX < SecondMatrix.HeightOfMatrix; CoordinateX++)
 			{
-				for (int CoordinateX = 0; CoordinateX < SecondMatrix.HeightOfMatrix; CoordinateX++)
+				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
+					for (int AdditionalCoordinate = 0; AdditionalCoordinate < SecondMatrix.HeightOfMatrix; AdditionalCoordinate++)
 					{
-						MultilpicationOfMatrix.SquareMatrix[AdditionalCoordinate][CoordinateX] = SquareMatrix[AdditionalCoordinate][CoordinateY] * SecondMatrix.SquareMatrix[CoordinateY][CoordinateX];
+						SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][AdditionalCoordinate] * SecondMatrix.SquareMatrix[AdditionalCoordinate][CoordinateY];
 					}
 				}
 			}
 
-			return MultilpicationOfMatrix;
+			return *this;
 		}
 	}
 
@@ -185,17 +177,15 @@ public:
 	{
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
-			Matrix SubtractionOfMatrix(SecondMatrix.HeightOfMatrix);
-
 			for (int CoordinateX = 0; CoordinateX < SecondMatrix.HeightOfMatrix; CoordinateX++)
 			{
 				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					SubtractionOfMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] - SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
+					SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] - SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
 				}
 			}
 
-			return SubtractionOfMatrix;
+			return *this;
 		}
 	}
 
@@ -203,17 +193,15 @@ public:
 	{
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
-			Matrix SummitionOfMatrix(SecondMatrix.HeightOfMatrix);
-
 			for (int CoordinateX = 0; CoordinateX < SecondMatrix.HeightOfMatrix; CoordinateX++)
 			{
 				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					SummitionOfMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] + SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
+					SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] + SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
 				}
 			}
 
-			return SummitionOfMatrix;
+			return *this;
 		}
 	}
 
@@ -238,21 +226,21 @@ public:
 
 	friend ostream& operator << (ostream& OutputStream, const Matrix& Matrix)
 	{
+		cout << "System of linear equations :\n" << endl;
+
 		for (int CoordinateX = 0; CoordinateX < Matrix.HeightOfMatrix; CoordinateX++)
 		{
-			for (int CoordinateY = 0; CoordinateY < Matrix.LengthOfMatrix; CoordinateY++)
+			for (int CoordinateY = 0; CoordinateY < Matrix.LengthOfMatrix - 1; CoordinateY++)
 			{
-				OutputStream << setw(3) << setprecision(3) << Matrix.SquareMatrix[CoordinateX][CoordinateY] << "*x" << CoordinateY;
+				OutputStream << setw(3) << Matrix.SquareMatrix[CoordinateX][CoordinateY] << "*x" << CoordinateY + 1;
 
-				if (CoordinateY < Matrix.LengthOfMatrix - 1)
+				if (CoordinateY < Matrix.LengthOfMatrix - 2)
 				{
-					OutputStream << setw(3) << setprecision(3) << " + ";
-				}
-				else if(CoordinateY == Matrix.LengthOfMatrix - 1)
-				{
-					OutputStream << setw(3) << setprecision(3) << "=" <<Matrix.SquareMatrix[CoordinateX][CoordinateY];
+					OutputStream << setw(3) << " + ";
 				}
 			}
+
+			OutputStream << setw(3) << "= " << Matrix.SquareMatrix[CoordinateX][Matrix.LengthOfMatrix - 1];
 
 			OutputStream << endl;
 		}
@@ -268,11 +256,11 @@ public:
 
 void GaussMethod(const Matrix& UserMatrix)
 {
-	Matrix AxillaryMatrix = UserMatrix,ValidationMatrix = UserMatrix;
+	Matrix AxillaryMatrix = UserMatrix;
 
-	int CoordinateX, CoordinateY, AdditionalCoordinate, 
+	Matrix ValidationMatrix = UserMatrix;
 
-	SizeOfSolutionsArray = AxillaryMatrix.GetHeightOfMatrix();
+	int CoordinateX, CoordinateY, AdditionalCoordinate, SizeOfSolutionsArray = AxillaryMatrix.GetHeightOfMatrix();
 
 	double* ArrayOfSolutions = new double[SizeOfSolutionsArray];
 
@@ -307,14 +295,19 @@ void GaussMethod(const Matrix& UserMatrix)
 		ArrayOfSolutions[CoordinateX] = (AxillaryMatrix[CoordinateX][SizeOfSolutionsArray] - Buffer) / AxillaryMatrix[CoordinateX][CoordinateX];
 	}
 
-	cout << "A solution of current system of linear equations :" << endl;
+	cout << "A solution of current system of linear equations :\n" << endl;
 
 	for (CoordinateX = 0; CoordinateX < SizeOfSolutionsArray; CoordinateX++)
 	{
-		cout << "x" << CoordinateX << " = " << ArrayOfSolutions[CoordinateX] << endl;
+		cout << setw(2) << "x" << CoordinateX + 1 << " = " << ArrayOfSolutions[CoordinateX] << endl;
+
+		if (CoordinateX == SizeOfSolutionsArray - 1)
+		{
+			cout << endl;
+		}
 	}
 
-	cout << "Validation checking :" << endl;
+	cout << "Validation checking :\n" << endl;
 
 	for (CoordinateX = 0; CoordinateX < SizeOfSolutionsArray; CoordinateX++)
 	{
@@ -325,7 +318,12 @@ void GaussMethod(const Matrix& UserMatrix)
 			ValidationCheck[CoordinateX] += ValidationMatrix[CoordinateX][CoordinateY] * ArrayOfSolutions[CoordinateY];
 		}
 
-		cout << ValidationCheck[CoordinateX] << endl;
+		cout << setw(2) << "s" << CoordinateX + 1 << " = " << ValidationCheck[CoordinateX] << endl;
+
+		if (CoordinateX == SizeOfSolutionsArray - 1)
+		{
+			cout << endl;
+		}
 	}
 
 	delete[] ValidationCheck;
@@ -335,13 +333,13 @@ void GaussMethod(const Matrix& UserMatrix)
 
 void main()
 {
-	Matrix UserMatrix(7);
+	Matrix UserMatrix(3);
 
-	UserMatrix.SimmetricalMatrixFilling();
+	UserMatrix.AsimmetricalMatrixFilling();
 
-	cout << UserMatrix;
+	cout << ~UserMatrix << endl;
 
-	GaussMethod(UserMatrix);
+	cout << ~UserMatrix << endl;
 
 	system("pause");
 }
