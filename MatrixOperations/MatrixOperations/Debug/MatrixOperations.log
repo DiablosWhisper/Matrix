@@ -1,7 +1,0 @@
-﻿  Matrix.cpp
-c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(107): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(120): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(716): warning C4326: return type of 'main' should be 'int' instead of 'void'
-c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(264): warning C4715: 'Matrix::operator+': not all control paths return a value
-c:\users\gleb\source\repos\matrix\matrixoperations\matrixoperations\matrix.cpp(246): warning C4715: 'Matrix::operator-': not all control paths return a value
-  MatrixOperations.vcxproj -> C:\Users\Gleb\source\repos\Matrix\MatrixOperations\Debug\MatrixOperations.exe

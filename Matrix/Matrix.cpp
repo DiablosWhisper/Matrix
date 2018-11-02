@@ -158,6 +158,29 @@ public:
 		}
 	}
 
+	Matrix LinearRegressionMatrixFilling(int NumberOfParameters, Matrix& VectorOfCoefficients)
+	{
+		Matrix TestMatrix(NumberOfParameters,VectorOfCoefficients.LengthOfMatrix);
+
+		TestMatrix.NullMatrixFilling();
+
+		for (int CoordinateX = 0; CoordinateX < NumberOfParameters; CoordinateX++)
+		{
+			for (int CoordinateY = 1; CoordinateY < VectorOfCoefficients.LengthOfMatrix; CoordinateY++)
+			{
+				TestMatrix[CoordinateX][CoordinateY] = (1 + rand() % 1000) * pow(-1,rand());
+
+				TestMatrix[CoordinateX][0] += TestMatrix[CoordinateX][CoordinateY] * VectorOfCoefficients[0][CoordinateY];
+			}
+
+			TestMatrix[CoordinateX][0] += VectorOfCoefficients[0][0];
+
+			TestMatrix[CoordinateX][0] += (rand() % 7) * pow(-1, rand());
+		}
+
+		return TestMatrix;
+	}
+
 	void Dispose()
 	{
 		for (int CoordinateX = 0; CoordinateX < HeightOfMatrix; CoordinateX++)
@@ -774,9 +797,7 @@ void JakobiRotationMethod(Matrix UserMatrix, const double PrecisionOfResult)
 
 void LinearRegression(Matrix MatrixOfCoordinates)
 {
-	Matrix AxillaryMatrix(MatrixOfCoordinates.GetLengthOfMatrix(), MatrixOfCoordinates.GetLengthOfMatrix());
-
-	Matrix VectorOfSolutions(1, MatrixOfCoordinates.GetLengthOfMatrix());
+	Matrix AxillaryMatrix(MatrixOfCoordinates.GetLengthOfMatrix(), MatrixOfCoordinates.GetLengthOfMatrix() + 1);
 
 	int CoordinateX = 0,
 
@@ -785,8 +806,6 @@ void LinearRegression(Matrix MatrixOfCoordinates)
 		AdditionalCoordinate = 0;
 
 	AxillaryMatrix.NullMatrixFilling();
-
-	VectorOfSolutions.NullMatrixFilling();
 
 	AxillaryMatrix[0][0] = MatrixOfCoordinates.GetHeightOfMatrix();
 
@@ -821,20 +840,32 @@ void LinearRegression(Matrix MatrixOfCoordinates)
 
 	for (CoordinateX = 0; CoordinateX < MatrixOfCoordinates.GetHeightOfMatrix(); CoordinateX++)
 	{
-		VectorOfSolutions[0][0] += MatrixOfCoordinates[CoordinateX][0];
+		AxillaryMatrix[AxillaryMatrix.GetLengthOfMatrix()][AxillaryMatrix.GetLengthOfMatrix()] += MatrixOfCoordinates[CoordinateX][0];
 	}
 
 	for (CoordinateX = 1; CoordinateX < MatrixOfCoordinates.GetLengthOfMatrix(); CoordinateX++)
 	{
 		for (CoordinateY = 0; CoordinateY < MatrixOfCoordinates.GetHeightOfMatrix(); CoordinateY++)
 		{
-			VectorOfSolutions[0][CoordinateX] += MatrixOfCoordinates[CoordinateY][0] * MatrixOfCoordinates[CoordinateY][CoordinateX];
+			AxillaryMatrix[CoordinateX][AxillaryMatrix.GetLengthOfMatrix()] += MatrixOfCoordinates[CoordinateY][0] * MatrixOfCoordinates[CoordinateY][CoordinateX];
 		}
 	}
 
 	cout << "Vector of solutions :\n" << endl;
 
-	cout << VectorOfSolutions << endl;
+	cout << "x = (";
+
+	for (CoordinateX = 0; CoordinateX < AxillaryMatrix.GetHeightOfMatrix(); CoordinateX++)
+	{
+		cout << AxillaryMatrix[CoordinateX][AxillaryMatrix.GetLengthOfMatrix()];
+
+		if (CoordinateX < AxillaryMatrix.GetHeightOfMatrix - 1)
+		{
+			cout << ",";
+		}
+	}
+
+	cout << ")" << endl;
 }
 
 int ConvertToInt(int Value)
