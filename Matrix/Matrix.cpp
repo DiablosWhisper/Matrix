@@ -158,29 +158,6 @@ public:
 		}
 	}
 
-	Matrix LinearRegressionMatrixFilling(int NumberOfParameters, Matrix& VectorOfCoefficients)
-	{
-		Matrix TestMatrix(NumberOfParameters,VectorOfCoefficients.LengthOfMatrix);
-
-		TestMatrix.NullMatrixFilling();
-
-		for (int CoordinateX = 0; CoordinateX < NumberOfParameters; CoordinateX++)
-		{
-			for (int CoordinateY = 1; CoordinateY < VectorOfCoefficients.LengthOfMatrix; CoordinateY++)
-			{
-				TestMatrix[CoordinateX][CoordinateY] = (1 + rand() % 1000) * pow(-1,rand());
-
-				TestMatrix[CoordinateX][0] += TestMatrix[CoordinateX][CoordinateY] * VectorOfCoefficients[0][CoordinateY];
-			}
-
-			TestMatrix[CoordinateX][0] += VectorOfCoefficients[0][0];
-
-			TestMatrix[CoordinateX][0] += (rand() % 7) * pow(-1, rand());
-		}
-
-		return TestMatrix;
-	}
-
 	void Dispose()
 	{
 		for (int CoordinateX = 0; CoordinateX < HeightOfMatrix; CoordinateX++)
@@ -204,7 +181,7 @@ public:
 		{
 			for (int CoordinateY = 0; CoordinateY < LengthOfMatrix; CoordinateY++)
 			{
-				MultiplicationMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] * Multiplicator;
+				MultiplicationMatrix.SquareMatrix[CoordinateX][CoordinateY] = this->SquareMatrix[CoordinateX][CoordinateY] * Multiplicator;
 			}
 		}
 
@@ -219,7 +196,7 @@ public:
 			{
 				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					SquareMatrix[CoordinateX][CoordinateY] = SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
+					this->SquareMatrix[CoordinateX][CoordinateY] = SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
 				}
 			}
 
@@ -229,7 +206,7 @@ public:
 
 	Matrix operator * (Matrix& SecondMatrix)
 	{
-		Matrix MultiplicationMatrix(SecondMatrix.GetHeightOfMatrix(), SecondMatrix.GetLengthOfMatrix());
+		Matrix MultiplicationMatrix(SecondMatrix.LengthOfMatrix, SecondMatrix.HeightOfMatrix);
 
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
@@ -239,9 +216,16 @@ public:
 				{
 					for (int AdditionalCoordinate = 0; AdditionalCoordinate < SecondMatrix.LengthOfMatrix; AdditionalCoordinate++)
 					{
-						MultiplicationMatrix.SquareMatrix[CoordinateX][CoordinateY] += SquareMatrix[CoordinateX][AdditionalCoordinate] * SecondMatrix.SquareMatrix[AdditionalCoordinate][CoordinateY];
+						MultiplicationMatrix.SquareMatrix[CoordinateX][CoordinateY] += this->SquareMatrix[CoordinateX][AdditionalCoordinate] * SecondMatrix.SquareMatrix[AdditionalCoordinate][CoordinateY];
 					}
 				}
+			}
+		}
+		else if (SecondMatrix.HeightOfMatrix == 1 && SecondMatrix.LengthOfMatrix > 1)
+		{
+			for (int CoordinateX = 0; CoordinateX < SecondMatrix.LengthOfMatrix; CoordinateX++)
+			{
+				MultiplicationMatrix[0][CoordinateX] = this->SquareMatrix[0][CoordinateX] * SecondMatrix.SquareMatrix[0][CoordinateX];
 			}
 		}
 
@@ -250,7 +234,7 @@ public:
 
 	Matrix operator - (Matrix& SecondMatrix)
 	{
-		Matrix SubstractionMatrix(SecondMatrix.GetHeightOfMatrix(), SecondMatrix.GetLengthOfMatrix());
+		Matrix SubstractionMatrix(SecondMatrix.HeightOfMatrix, SecondMatrix.LengthOfMatrix);
 
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
@@ -258,7 +242,7 @@ public:
 			{
 				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					SubstractionMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] - SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
+					SubstractionMatrix.SquareMatrix[CoordinateX][CoordinateY] = this->SquareMatrix[CoordinateX][CoordinateY] - SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
 				}
 			}
 
@@ -268,7 +252,7 @@ public:
 
 	Matrix operator + (Matrix& SecondMatrix)
 	{
-		Matrix SummitionMatrix(SecondMatrix.GetHeightOfMatrix(), SecondMatrix.GetLengthOfMatrix());
+		Matrix SummitionMatrix(SecondMatrix.HeightOfMatrix, SecondMatrix.LengthOfMatrix);
 
 		if (HeightOfMatrix == SecondMatrix.HeightOfMatrix && LengthOfMatrix == SecondMatrix.LengthOfMatrix)
 		{
@@ -276,11 +260,30 @@ public:
 			{
 				for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
 				{
-					SummitionMatrix.SquareMatrix[CoordinateX][CoordinateY] = SquareMatrix[CoordinateX][CoordinateY] + SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
+					SummitionMatrix.SquareMatrix[CoordinateX][CoordinateY] = this->SquareMatrix[CoordinateX][CoordinateY] + SecondMatrix.SquareMatrix[CoordinateX][CoordinateY];
 				}
 			}
 
 			return SummitionMatrix;
+		}
+	}
+
+	bool operator == (const Matrix& SecondMatrix)
+	{
+		if (HeightOfMatrix != SecondMatrix.HeightOfMatrix || LengthOfMatrix != SecondMatrix.LengthOfMatrix)
+		{
+			return false;
+		}
+
+		for (int CoordinateX = 0; CoordinateX < SecondMatrix.HeightOfMatrix; CoordinateX++)
+		{
+			for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
+			{
+				if (this->SquareMatrix[CoordinateX][CoordinateY] != SecondMatrix.SquareMatrix[CoordinateX][CoordinateY])
+				{
+					return false;
+				}
+			}
 		}
 	}
 
@@ -305,25 +308,6 @@ public:
 		}
 
 		return TranspositionMatrix;
-	}
-
-	friend bool operator == (const Matrix& FirstMatrix, const Matrix& SecondMatrix)
-	{
-		if (FirstMatrix.HeightOfMatrix != SecondMatrix.HeightOfMatrix || FirstMatrix.LengthOfMatrix != SecondMatrix.LengthOfMatrix)
-		{
-			return false;
-		}
-
-		for (int CoordinateX = 0; CoordinateX < FirstMatrix.HeightOfMatrix; CoordinateX++)
-		{
-			for (int CoordinateY = 0; CoordinateY < SecondMatrix.LengthOfMatrix; CoordinateY++)
-			{
-				if (FirstMatrix.SquareMatrix[CoordinateX][CoordinateY] != SecondMatrix.SquareMatrix[CoordinateX][CoordinateY])
-				{
-					return false;
-				}
-			}
-		}
 	}
 
 	friend ostream& operator << (ostream& OutputStream, const Matrix& UserMatrix)
@@ -428,6 +412,35 @@ public:
 	}
 };
 
+void ValidationChecking(Matrix& ValidationMatrix, Matrix& VectorOfSolutions)
+{
+	double Result = 0;
+
+	for (int CoordinateX = 0; CoordinateX < VectorOfSolutions.GetLengthOfMatrix(); CoordinateX++)
+	{
+		Result = 0;
+
+		for (int CoordinateY = 0; CoordinateY < VectorOfSolutions.GetLengthOfMatrix(); CoordinateY++)
+		{
+			cout << setw(3) << ValidationMatrix[CoordinateX][CoordinateY];
+
+			if (CoordinateY < VectorOfSolutions.GetLengthOfMatrix() - 1)
+			{
+				cout << "*" << VectorOfSolutions[0][CoordinateY] << setw(3) << " + ";
+			}
+
+			if (CoordinateY == VectorOfSolutions.GetLengthOfMatrix() - 1)
+			{
+				cout << "*" << VectorOfSolutions[0][CoordinateY] << setw(3) << " = ";
+			}
+
+			Result += ValidationMatrix[CoordinateX][CoordinateY] * VectorOfSolutions[0][CoordinateY];
+		}
+
+		cout << Result << endl;
+	}
+}
+
 bool MatrixIsSimmetric(Matrix UserMatrix)
 {
 	for (int CoordinateX = 0; CoordinateX < UserMatrix.GetHeightOfMatrix(); CoordinateX++)
@@ -468,13 +481,21 @@ double ScalarProduct(Matrix FirstVector, Matrix SecondVector)
 	return Scalar;
 }
 
-void GaussMethod(Matrix UserMatrix)
+Matrix GaussMethod(Matrix& UserMatrix)
 {
-	Matrix CopiedMatrix = UserMatrix,
+	Matrix
+
+		CopiedMatrix(UserMatrix.GetHeightOfMatrix(), UserMatrix.GetLengthOfMatrix()),
+
+		ValidationArray(1, UserMatrix.GetHeightOfMatrix()),
+
+		VectorOfSolutions(1, UserMatrix.GetHeightOfMatrix()),
 
 		ValidationMatrix(UserMatrix.GetHeightOfMatrix(), UserMatrix.GetLengthOfMatrix());
 
-	int CoordinateX = 0,
+	int
+
+		CoordinateX = 0,
 
 		CoordinateY = 0,
 
@@ -482,13 +503,13 @@ void GaussMethod(Matrix UserMatrix)
 
 		SizeOfSolutionsArray = CopiedMatrix.GetHeightOfMatrix();
 
-	double* ArrayOfSolutions = new double[SizeOfSolutionsArray];
+	double
 
-	double* ValidationArray = new double[SizeOfSolutionsArray];
-
-	double Buffer = 0,
+		Buffer = 0,
 
 		Result = 0;
+
+	CopiedMatrix = UserMatrix;
 
 	ValidationMatrix = CopiedMatrix;
 
@@ -509,7 +530,7 @@ void GaussMethod(Matrix UserMatrix)
 		}
 	}
 
-	ArrayOfSolutions[SizeOfSolutionsArray - 1] = CopiedMatrix[SizeOfSolutionsArray - 1][SizeOfSolutionsArray] / CopiedMatrix[SizeOfSolutionsArray - 1][SizeOfSolutionsArray - 1];
+	VectorOfSolutions[0][SizeOfSolutionsArray - 1] = CopiedMatrix[SizeOfSolutionsArray - 1][SizeOfSolutionsArray] / CopiedMatrix[SizeOfSolutionsArray - 1][SizeOfSolutionsArray - 1];
 
 	for (CoordinateX = CopiedMatrix.GetHeightOfMatrix() - 2; CoordinateX >= 0; CoordinateX--)
 	{
@@ -517,17 +538,17 @@ void GaussMethod(Matrix UserMatrix)
 
 		for (CoordinateY = CoordinateX + 1; CoordinateY < CopiedMatrix.GetHeightOfMatrix(); CoordinateY++)
 		{
-			Buffer += CopiedMatrix[CoordinateX][CoordinateY] * ArrayOfSolutions[CoordinateY];
+			Buffer += CopiedMatrix[CoordinateX][CoordinateY] * VectorOfSolutions[0][CoordinateY];
 		}
 
-		ArrayOfSolutions[CoordinateX] = (CopiedMatrix[CoordinateX][SizeOfSolutionsArray] - Buffer) / CopiedMatrix[CoordinateX][CoordinateX];
+		VectorOfSolutions[0][CoordinateX] = (CopiedMatrix[CoordinateX][SizeOfSolutionsArray] - Buffer) / CopiedMatrix[CoordinateX][CoordinateX];
 	}
 
 	cout << "A solution of current system of linear equations :\n" << endl;
 
 	for (CoordinateX = 0; CoordinateX < SizeOfSolutionsArray; CoordinateX++)
 	{
-		cout << setw(2) << "x" << CoordinateX + 1 << " = " << ArrayOfSolutions[CoordinateX] << endl;
+		cout << setw(2) << "x" << CoordinateX + 1 << " = " << VectorOfSolutions[0][CoordinateX] << endl;
 
 		if (CoordinateX == SizeOfSolutionsArray - 1)
 		{
@@ -537,57 +558,51 @@ void GaussMethod(Matrix UserMatrix)
 
 	cout << "Validation checking :\n" << endl;
 
-	for (CoordinateX = 0; CoordinateX < SizeOfSolutionsArray; CoordinateX++)
-	{
-		Result = 0;
-
-		for (CoordinateY = 0; CoordinateY < SizeOfSolutionsArray; CoordinateY++)
-		{
-			cout << setw(3) << ValidationMatrix[CoordinateX][CoordinateY];
-
-			if (CoordinateY < SizeOfSolutionsArray - 1)
-			{
-				cout << "*" << ArrayOfSolutions[CoordinateY] << setw(3) << " + ";
-			}
-
-			if (CoordinateY == SizeOfSolutionsArray - 1)
-			{
-				cout << "*" << ArrayOfSolutions[CoordinateY] << setw(3) << " = ";
-			}
-
-			Result += ValidationMatrix[CoordinateX][CoordinateY] * ArrayOfSolutions[CoordinateY];
-		}
-
-		cout << Result << endl;
-	}
+	ValidationChecking(ValidationMatrix, VectorOfSolutions);
 
 	cout << endl;
 
-	delete[] ValidationArray;
+	CopiedMatrix.Dispose();
 
-	delete[] ArrayOfSolutions;
+	ValidationArray.Dispose();
+
+	ValidationMatrix.Dispose();
+
+	return VectorOfSolutions;
 }
 
-void KaczmarzMethod(Matrix UserMatrix, const double PrecisionOfResult)
+Matrix KaczmarzMethod(Matrix& UserMatrix, const double PrecisionOfResult)
 {
-	Matrix Vector(1, UserMatrix.GetLengthOfMatrix() - 1);
+	Matrix
 
-	Matrix AxillaryVector(1, UserMatrix.GetLengthOfMatrix() - 1);
+		ValidationMatrix(UserMatrix.GetHeightOfMatrix(), UserMatrix.GetLengthOfMatrix()),
 
-	Matrix SubstractionVector(1, UserMatrix.GetLengthOfMatrix() - 1);
+		VectorOfSolutions(1, UserMatrix.GetHeightOfMatrix()),
 
-	for (int CoordinateX = 0; CoordinateX < Vector.GetLengthOfMatrix(); CoordinateX++)
-	{
-		Vector[0][CoordinateX] = UserMatrix[0][CoordinateX];
-	}
+		AxillaryVector(1, UserMatrix.GetHeightOfMatrix()),
+
+		SubstractionVector(1, UserMatrix.GetHeightOfMatrix());
+
+	double
+
+		Coefficient = 0,
+
+		Result = 0;
+
+	int Iterator = 0,
+
+		SizeOfSolutionsVector = UserMatrix.GetHeightOfMatrix();
+
+	ValidationMatrix = UserMatrix;
 
 	AxillaryVector.NullMatrixFilling();
 
 	SubstractionVector.UnitVectorFilling();
 
-	double Coefficient = 0;
-
-	int Iterator = 0;
+	for (int CoordinateX = 0; CoordinateX < VectorOfSolutions.GetLengthOfMatrix(); CoordinateX++)
+	{
+		VectorOfSolutions[0][CoordinateX] = UserMatrix[0][CoordinateX];
+	}
 
 	cout << "System of linear equations :\n" << endl;
 
@@ -602,17 +617,15 @@ void KaczmarzMethod(Matrix UserMatrix, const double PrecisionOfResult)
 			TemporaryVector[0][CoordinateX] = UserMatrix[Iterator][CoordinateX];
 		}
 
-		Coefficient = (UserMatrix[Iterator][UserMatrix.GetLengthOfMatrix() - 1] - ScalarProduct(TemporaryVector, Vector)) / (VectorRate(TemporaryVector) * VectorRate(TemporaryVector));
+		Coefficient = (UserMatrix[Iterator][UserMatrix.GetLengthOfMatrix() - 1] - ScalarProduct(TemporaryVector, VectorOfSolutions)) / (VectorRate(TemporaryVector) * VectorRate(TemporaryVector));
 
 		TemporaryVector = TemporaryVector * Coefficient;
 
-		AxillaryVector = Vector + TemporaryVector;
+		AxillaryVector = VectorOfSolutions + TemporaryVector;
 
-		SubstractionVector = AxillaryVector - Vector;
+		SubstractionVector = AxillaryVector - VectorOfSolutions;
 
-		Vector = AxillaryVector;
-
-		TemporaryVector.Dispose();
+		VectorOfSolutions = AxillaryVector;
 
 		if (Iterator < TemporaryVector.GetLengthOfMatrix() - 1)
 		{
@@ -622,22 +635,40 @@ void KaczmarzMethod(Matrix UserMatrix, const double PrecisionOfResult)
 		{
 			Iterator = 0;
 		}
+
+		TemporaryVector.Dispose();
 	}
 
 	cout << "Vector of solutions :\n" << endl;
 
-	cout << Vector << endl;
+	cout << VectorOfSolutions << endl;
 
 	cout << "Last coefficient :\n" << endl;
 
 	cout << Coefficient << endl;
 
 	cout << endl;
+
+	cout << "Validation checking :\n" << endl;
+
+	ValidationChecking(ValidationMatrix, VectorOfSolutions);
+
+	cout << endl;
+
+	AxillaryVector.Dispose();
+
+	SubstractionVector.Dispose();
+
+	ValidationMatrix.Dispose();
+
+	return VectorOfSolutions;
 }
 
-void JakobiRotationMethod(Matrix UserMatrix, const double PrecisionOfResult)
+Matrix JakobiRotationMethod(Matrix& UserMatrix, const double PrecisionOfResult)
 {
-	Matrix CopiedMatrix = UserMatrix,
+	Matrix
+
+		CopiedMatrix(UserMatrix.GetHeightOfMatrix()),
 
 		MatrixOfSolutions(UserMatrix.GetHeightOfMatrix()),
 
@@ -645,9 +676,12 @@ void JakobiRotationMethod(Matrix UserMatrix, const double PrecisionOfResult)
 
 		RotationMatrix(UserMatrix.GetHeightOfMatrix()),
 
-		ValidationMatrix(UserMatrix.GetHeightOfMatrix());
+		ValidationMatrix(UserMatrix.GetHeightOfMatrix()),
 
-	int MaxCoordinateX = 0,
+		VectorOfSolutions(1, UserMatrix.GetHeightOfMatrix());
+
+	int
+		MaxCoordinateX = 0,
 
 		MaxCoordinateY = 0,
 
@@ -657,96 +691,28 @@ void JakobiRotationMethod(Matrix UserMatrix, const double PrecisionOfResult)
 
 		SizeOfSquareMatrix = UserMatrix.GetHeightOfMatrix();
 
-	double MaxCoefficient = 0,
+	double
+
+		MaxCoefficient = 0,
 
 		AngleFi = 0,
 
 		Fault = 0;
 
+	CopiedMatrix = UserMatrix;
+
 	MatrixOfSolutions.UnitMatrixFilling();
 
-	cout << "System of linear equations :\n" << endl;
-
-	cout << CopiedMatrix << endl;
-
-	for (int CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+	if (MatrixIsSimmetric(UserMatrix))
 	{
-		for (int CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+
+		cout << "System of linear equations :\n" << endl;
+
+		cout << CopiedMatrix << endl;
+
+		for (int CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
 		{
-			Fault = Fault + CopiedMatrix[CoordinateX][CoordinateY] * CopiedMatrix[CoordinateX][CoordinateY];
-		}
-	}
-
-	Fault = sqrt(2 * Fault);
-
-	while (Fault > PrecisionOfResult)
-	{
-		MaxCoefficient = 0;
-
-		for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
-		{
-			for (CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
-			{
-				if (CopiedMatrix[CoordinateX][CoordinateY] > 0 && CopiedMatrix[CoordinateX][CoordinateY] > MaxCoefficient)
-				{
-					MaxCoefficient = CopiedMatrix[CoordinateX][CoordinateY];
-
-					MaxCoordinateX = CoordinateX;
-
-					MaxCoordinateY = CoordinateY;
-				}
-				else if (CopiedMatrix[CoordinateX][CoordinateY] < 0 && -CopiedMatrix[CoordinateX][CoordinateY] > MaxCoefficient)
-				{
-					MaxCoefficient = -CopiedMatrix[CoordinateX][CoordinateY];
-
-					MaxCoordinateX = CoordinateX;
-
-					MaxCoordinateY = CoordinateY;
-				}
-			}
-		}
-
-		RotationMatrix.UnitMatrixFilling();
-
-		if (CopiedMatrix[MaxCoordinateX][MaxCoordinateX] == CopiedMatrix[MaxCoordinateY][MaxCoordinateY])
-		{
-			RotationMatrix[MaxCoordinateX][MaxCoordinateX] = RotationMatrix[MaxCoordinateY][MaxCoordinateY] = RotationMatrix[MaxCoordinateY][MaxCoordinateX] = sqrt(2.0) / 2.0;
-
-			RotationMatrix[MaxCoordinateX][MaxCoordinateY] = -sqrt(2.0) / 2.0;
-		}
-		else
-		{
-			AngleFi = 0.5 * atan((2.0 * CopiedMatrix[MaxCoordinateX][MaxCoordinateY]) / (CopiedMatrix[MaxCoordinateX][MaxCoordinateX] - CopiedMatrix[MaxCoordinateY][MaxCoordinateY]));
-
-			RotationMatrix[MaxCoordinateX][MaxCoordinateX] = RotationMatrix[MaxCoordinateY][MaxCoordinateY] = cos(AngleFi);
-
-			RotationMatrix[MaxCoordinateX][MaxCoordinateY] = -sin(AngleFi);
-
-			RotationMatrix[MaxCoordinateY][MaxCoordinateX] = sin(AngleFi);
-		}
-
-		BufferMatrix.NullMatrixFilling();
-
-		for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
-		{
-			for (CoordinateY = 0; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
-			{
-				for (int AdditionalCoordinate = 0; AdditionalCoordinate < SizeOfSquareMatrix; AdditionalCoordinate++)
-				{
-					BufferMatrix[CoordinateX][CoordinateY] = BufferMatrix[CoordinateX][CoordinateY] + RotationMatrix[AdditionalCoordinate][CoordinateX] * CopiedMatrix[AdditionalCoordinate][CoordinateY];
-				}
-			}
-		}
-
-		CopiedMatrix.NullMatrixFilling();
-
-		CopiedMatrix = BufferMatrix * RotationMatrix;
-
-		Fault = 0.0;
-
-		for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
-		{
-			for (CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+			for (int CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
 			{
 				Fault = Fault + CopiedMatrix[CoordinateX][CoordinateY] * CopiedMatrix[CoordinateX][CoordinateY];
 			}
@@ -754,82 +720,206 @@ void JakobiRotationMethod(Matrix UserMatrix, const double PrecisionOfResult)
 
 		Fault = sqrt(2 * Fault);
 
-		BufferMatrix.NullMatrixFilling();
-
-		BufferMatrix = MatrixOfSolutions * RotationMatrix;
-
-		MatrixOfSolutions = BufferMatrix;
-	}
-
-	cout << "A solution of current system of linear equations :\n" << endl;
-
-	for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
-	{
-		cout << setw(2) << "x" << CoordinateX + 1 << " = (";
-
-		for (CoordinateY = 0; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+		while (Fault > PrecisionOfResult)
 		{
-			cout << MatrixOfSolutions[CoordinateX][CoordinateY];
+			MaxCoefficient = 0;
 
-			if (CoordinateY < SizeOfSquareMatrix - 1)
+			for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
 			{
-				cout << ",";
+				for (CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+				{
+					if (CopiedMatrix[CoordinateX][CoordinateY] > 0 && CopiedMatrix[CoordinateX][CoordinateY] > MaxCoefficient)
+					{
+						MaxCoefficient = CopiedMatrix[CoordinateX][CoordinateY];
+
+						MaxCoordinateX = CoordinateX;
+
+						MaxCoordinateY = CoordinateY;
+					}
+					else if (CopiedMatrix[CoordinateX][CoordinateY] < 0 && -CopiedMatrix[CoordinateX][CoordinateY] > MaxCoefficient)
+					{
+						MaxCoefficient = -CopiedMatrix[CoordinateX][CoordinateY];
+
+						MaxCoordinateX = CoordinateX;
+
+						MaxCoordinateY = CoordinateY;
+					}
+				}
 			}
 
-			if (CoordinateY == SizeOfSquareMatrix - 1)
+			RotationMatrix.UnitMatrixFilling();
+
+			if (CopiedMatrix[MaxCoordinateX][MaxCoordinateX] == CopiedMatrix[MaxCoordinateY][MaxCoordinateY])
 			{
-				cout << ")" << endl;
+				RotationMatrix[MaxCoordinateX][MaxCoordinateX] = RotationMatrix[MaxCoordinateY][MaxCoordinateY] = RotationMatrix[MaxCoordinateY][MaxCoordinateX] = sqrt(2.0) / 2.0;
+
+				RotationMatrix[MaxCoordinateX][MaxCoordinateY] = -sqrt(2.0) / 2.0;
+			}
+			else
+			{
+				AngleFi = 0.5 * atan((2.0 * CopiedMatrix[MaxCoordinateX][MaxCoordinateY]) / (CopiedMatrix[MaxCoordinateX][MaxCoordinateX] - CopiedMatrix[MaxCoordinateY][MaxCoordinateY]));
+
+				RotationMatrix[MaxCoordinateX][MaxCoordinateX] = RotationMatrix[MaxCoordinateY][MaxCoordinateY] = cos(AngleFi);
+
+				RotationMatrix[MaxCoordinateX][MaxCoordinateY] = -sin(AngleFi);
+
+				RotationMatrix[MaxCoordinateY][MaxCoordinateX] = sin(AngleFi);
+			}
+
+			BufferMatrix.NullMatrixFilling();
+
+			for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+			{
+				for (CoordinateY = 0; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+				{
+					for (int AdditionalCoordinate = 0; AdditionalCoordinate < SizeOfSquareMatrix; AdditionalCoordinate++)
+					{
+						BufferMatrix[CoordinateX][CoordinateY] = BufferMatrix[CoordinateX][CoordinateY] + RotationMatrix[AdditionalCoordinate][CoordinateX] * CopiedMatrix[AdditionalCoordinate][CoordinateY];
+					}
+				}
+			}
+
+			CopiedMatrix.NullMatrixFilling();
+
+			CopiedMatrix = BufferMatrix * RotationMatrix;
+
+			Fault = 0.0;
+
+			for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+			{
+				for (CoordinateY = CoordinateX + 1; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+				{
+					Fault = Fault + CopiedMatrix[CoordinateX][CoordinateY] * CopiedMatrix[CoordinateX][CoordinateY];
+				}
+			}
+
+			Fault = sqrt(2 * Fault);
+
+			BufferMatrix.NullMatrixFilling();
+
+			BufferMatrix = MatrixOfSolutions * RotationMatrix;
+
+			MatrixOfSolutions = BufferMatrix;
+		}
+
+		cout << "A solution of current system of linear equations :\n" << endl;
+
+		for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+		{
+			cout << setw(2) << "x" << CoordinateX + 1 << " = (";
+
+			for (CoordinateY = 0; CoordinateY < SizeOfSquareMatrix; CoordinateY++)
+			{
+				cout << MatrixOfSolutions[CoordinateX][CoordinateY];
+
+				if (CoordinateY < SizeOfSquareMatrix - 1)
+				{
+					cout << ",";
+				}
+
+				if (CoordinateY == SizeOfSquareMatrix - 1)
+				{
+					cout << ")" << endl;
+				}
 			}
 		}
+
+		cout << endl;
+
+		cout << "Own values of matrix :\n" << endl;
+
+		for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+		{
+			cout << setw(2) << "v" << CoordinateX + 1 << " = " << CopiedMatrix[CoordinateX][CoordinateX] << endl;
+
+			VectorOfSolutions[0][CoordinateX] = CopiedMatrix[CoordinateX][CoordinateX];
+		}
+
+		cout << endl;
+
+		CopiedMatrix.Dispose();
+
+		MatrixOfSolutions.Dispose();
+
+		BufferMatrix.Dispose();
+
+		RotationMatrix.Dispose();
+
+		ValidationMatrix.Dispose();
 	}
-
-	cout << endl;
-
-	cout << "Own values of matrix :\n" << endl;
-
-	for (CoordinateX = 0; CoordinateX < SizeOfSquareMatrix; CoordinateX++)
+	else
 	{
-		cout << setw(2) << "v" << CoordinateX + 1 << " = " << CopiedMatrix[CoordinateX][CoordinateX] << endl;
+		cout << "Matrix is asimmetric" << endl;
 	}
-
-	cout << endl;
+	return VectorOfSolutions;;
 }
 
-void LinearRegression(Matrix MatrixOfCoordinates)
+Matrix LinearRegressionMatrixFilling(Matrix& VectorOfCoefficients, int NumberOfParameters)
 {
-	Matrix AxillaryMatrix(MatrixOfCoordinates.GetLengthOfMatrix(), MatrixOfCoordinates.GetLengthOfMatrix() + 1);
+	Matrix TestMatrix(NumberOfParameters, VectorOfCoefficients.GetLengthOfMatrix());
 
-	int CoordinateX = 0,
+	TestMatrix.NullMatrixFilling();
+
+	for (int CoordinateX = 0; CoordinateX < NumberOfParameters; CoordinateX++)
+	{
+		for (int CoordinateY = 1; CoordinateY < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateY++)
+		{
+			TestMatrix[CoordinateX][CoordinateY] = (1 + rand() % 1000) * pow(-1, rand());
+
+			TestMatrix[CoordinateX][0] += TestMatrix[CoordinateX][CoordinateY] * VectorOfCoefficients[0][CoordinateY];
+		}
+
+		TestMatrix[CoordinateX][0] += VectorOfCoefficients[0][0];
+
+		TestMatrix[CoordinateX][0] += (rand() % 2) * pow(-1, rand());
+	}
+
+	return TestMatrix;
+}
+
+void LinearRegression(Matrix VectorOfCoefficients)
+{
+	Matrix
+
+		AxillaryMatrix(VectorOfCoefficients.GetLengthOfMatrix(), VectorOfCoefficients.GetLengthOfMatrix()),
+
+		ValidationMatrix(VectorOfCoefficients.GetLengthOfMatrix(), VectorOfCoefficients.GetLengthOfMatrix() + 1),
+
+		Vector(1, VectorOfCoefficients.GetLengthOfMatrix());
+
+	int
+
+		CoordinateX = 0,
 
 		CoordinateY = 0,
 
 		AdditionalCoordinate = 0;
 
+	ValidationMatrix.NullMatrixFilling();
+
 	AxillaryMatrix.NullMatrixFilling();
 
-	AxillaryMatrix[0][0] = MatrixOfCoordinates.GetHeightOfMatrix();
+	Vector.NullMatrixFilling();
 
-	cout << "A solution of current linear regression :\n" << endl;
+	AxillaryMatrix[0][0] = VectorOfCoefficients.GetHeightOfMatrix();
 
-	cout << MatrixOfCoordinates << endl;
-
-	for (CoordinateX = 1; CoordinateX < MatrixOfCoordinates.GetLengthOfMatrix(); CoordinateX++)
+	for (CoordinateX = 1; CoordinateX < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateX++)
 	{
-		for (CoordinateY = 0; CoordinateY < MatrixOfCoordinates.GetHeightOfMatrix(); CoordinateY++)
+		for (CoordinateY = 0; CoordinateY < VectorOfCoefficients.GetHeightOfMatrix(); CoordinateY++)
 		{
-			AxillaryMatrix[0][CoordinateX] += MatrixOfCoordinates[CoordinateY][CoordinateX];
+			AxillaryMatrix[0][CoordinateX] += VectorOfCoefficients[CoordinateY][CoordinateX];
 		}
 
 		AxillaryMatrix[CoordinateX][0] = AxillaryMatrix[0][CoordinateX];
 	}
 
-	for (CoordinateX = 1; CoordinateX < MatrixOfCoordinates.GetLengthOfMatrix(); CoordinateX++)
+	for (CoordinateX = 1; CoordinateX < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateX++)
 	{
-		for (CoordinateY = 1; CoordinateY < MatrixOfCoordinates.GetLengthOfMatrix(); CoordinateY++)
+		for (CoordinateY = 1; CoordinateY < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateY++)
 		{
-			for (AdditionalCoordinate = 0; AdditionalCoordinate < MatrixOfCoordinates.GetHeightOfMatrix(); AdditionalCoordinate++)
+			for (AdditionalCoordinate = 0; AdditionalCoordinate < VectorOfCoefficients.GetHeightOfMatrix(); AdditionalCoordinate++)
 			{
-				AxillaryMatrix[CoordinateX][CoordinateY] += MatrixOfCoordinates[AdditionalCoordinate][CoordinateX] * MatrixOfCoordinates[AdditionalCoordinate][CoordinateY];
+				AxillaryMatrix[CoordinateX][CoordinateY] += VectorOfCoefficients[AdditionalCoordinate][CoordinateX] * VectorOfCoefficients[AdditionalCoordinate][CoordinateY];
 			}
 		}
 	}
@@ -838,34 +928,34 @@ void LinearRegression(Matrix MatrixOfCoordinates)
 
 	cout << AxillaryMatrix << endl;
 
-	for (CoordinateX = 0; CoordinateX < MatrixOfCoordinates.GetHeightOfMatrix(); CoordinateX++)
+	for (CoordinateX = 0; CoordinateX < VectorOfCoefficients.GetHeightOfMatrix(); CoordinateX++)
 	{
-		AxillaryMatrix[AxillaryMatrix.GetLengthOfMatrix()][AxillaryMatrix.GetLengthOfMatrix()] += MatrixOfCoordinates[CoordinateX][0];
+		Vector[0][0] += VectorOfCoefficients[CoordinateX][0];
 	}
 
-	for (CoordinateX = 1; CoordinateX < MatrixOfCoordinates.GetLengthOfMatrix(); CoordinateX++)
+	for (CoordinateX = 1; CoordinateX < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateX++)
 	{
-		for (CoordinateY = 0; CoordinateY < MatrixOfCoordinates.GetHeightOfMatrix(); CoordinateY++)
+		for (CoordinateY = 0; CoordinateY < VectorOfCoefficients.GetHeightOfMatrix(); CoordinateY++)
 		{
-			AxillaryMatrix[CoordinateX][AxillaryMatrix.GetLengthOfMatrix()] += MatrixOfCoordinates[CoordinateY][0] * MatrixOfCoordinates[CoordinateY][CoordinateX];
+			Vector[0][CoordinateX] += VectorOfCoefficients[CoordinateY][0] * VectorOfCoefficients[CoordinateY][CoordinateX];
 		}
+	}
+
+	for (CoordinateX = 0; CoordinateX < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateX++)
+	{
+		for (CoordinateY = 0; CoordinateY < VectorOfCoefficients.GetLengthOfMatrix(); CoordinateY++)
+		{
+			ValidationMatrix[CoordinateX][CoordinateY] = AxillaryMatrix[CoordinateX][CoordinateY];
+		}
+
+		ValidationMatrix[CoordinateX][ValidationMatrix.GetLengthOfMatrix() - 1] = Vector[0][CoordinateX];
 	}
 
 	cout << "Vector of solutions :\n" << endl;
 
-	cout << "x = (";
+	cout << Vector << endl;
 
-	for (CoordinateX = 0; CoordinateX < AxillaryMatrix.GetHeightOfMatrix(); CoordinateX++)
-	{
-		cout << AxillaryMatrix[CoordinateX][AxillaryMatrix.GetLengthOfMatrix()];
-
-		if (CoordinateX < AxillaryMatrix.GetHeightOfMatrix - 1)
-		{
-			cout << ",";
-		}
-	}
-
-	cout << ")" << endl;
+	GaussMethod(ValidationMatrix);
 }
 
 int ConvertToInt(int Value)
@@ -887,7 +977,7 @@ void MNISTDataReader(int NumberOfImageToShow, int DataOfAnImage, vector<vector<d
 {
 	DataBase.resize(NumberOfImageToShow, vector<double>(DataOfAnImage));
 
-	ifstream file("C:\\t10k-images-idx3-ubyte.gz", ios::binary);
+	ifstream file("C://t10k-images-idx3-ubyte", ios::binary);
 
 	if (file.is_open())
 	{
@@ -939,26 +1029,220 @@ void LinearClassification()
 
 void main()
 {
-	vector<vector<double>> DataBase;
+	int
 
-	MNISTDataReader(10000, 784, DataBase);
+		Height = 0,
 
-	int Counter = 1;
+		Length = 0,
 
-	for (int CoordinateX = 0; CoordinateX < 10; CoordinateX++)
+		TypeOfFilling = 0,
+
+		NumberOfSamples = 0,
+
+		NumberOfMethod = 1;
+
+	double Epsilon = 0;
+
+	cout << "Press \"1\" to test Gauss method\nPress \"2\" to test Kaczmarz method\nPress \"3\" to test Jacobi rotation method\nPress \"4\" to test Linear regression method\nPress \"5\" to test Linear classificator\nPress \"0\" to exit\n" << endl;
+
+	while (NumberOfMethod != 0)
 	{
-		for (int CoordinateY = 0; CoordinateY < 784; CoordinateY++)
+		cout << "Input the number of method : ";
+
+		cin >> NumberOfMethod;
+
+		cout << endl;
+
+		if (NumberOfMethod == 1)
 		{
-			cout << setw(3) << DataBase[CoordinateX][CoordinateY] << " ";
+			cout << setw(50) << "Gauss Method\n" << endl;
 
-			if (Counter == 28)
+			cout << "Input the size of matrix (N x N+1) : ";
+
+			cin >> Height >> Length;
+
+			Matrix GaussMatrix(Height, Length);
+
+			cout << endl;
+
+			cout << "Press \"1\" to fill matrix asimmetrically\nPress \"2\" to fill matrix simmetrically\nPress \"3\" to make Hilbert's matrix\nPress \"4\" to fill matrix by yourself\n" << endl;
+
+			cout << "Input the type of filling : ";
+
+			cin >> TypeOfFilling;
+
+			cout << endl;
+
+			switch (TypeOfFilling)
 			{
-				cout << endl;
+			case 1:
 
-				Counter = 0;
+				GaussMatrix.AsimmetricalMatrixFilling();
+
+				GaussMethod(GaussMatrix);
+
+				break;
+			case 2:
+
+				GaussMatrix.SimmetricalMatrixFilling();
+
+				GaussMethod(GaussMatrix);
+
+				break;
+
+			case 3:
+
+				GaussMatrix.HilbertMatrixFilling();
+
+				GaussMethod(GaussMatrix);
+
+				break;
+
+			case 4:
+
+				cin >> GaussMatrix;
+
+				GaussMethod(GaussMatrix);
+
+				break;
 			}
+		}
 
-			Counter++;
+		if (NumberOfMethod == 2)
+		{
+
+			cout << setw(50) << "Kaczmarz Method\n" << endl;
+
+			cout << "Input the size of matrix (N x N+1) : ";
+
+			cin >> Height >> Length;
+
+			Matrix KaczmarzMatrix(Height, Length);
+
+			cout << endl;
+
+			cout << "Press \"1\" to fill matrix asimmetrically\nPress \"2\" to fill matrix simmetrically\nPress \"3\" to make Hilbert's matrix\nPress \"4\" to fill matrix by yourself\n" << endl;
+
+			cout << "Input the type of filling : ";
+
+			cin >> TypeOfFilling;
+
+			cout << endl;
+
+			cout << "Input the value of epsilon : ";
+
+			cin >> Epsilon;
+
+			cout << endl;
+
+			switch (TypeOfFilling)
+			{
+			case 1:
+
+				KaczmarzMatrix.AsimmetricalMatrixFilling();
+
+				KaczmarzMethod(KaczmarzMatrix, Epsilon);
+
+				break;
+			case 2:
+
+				KaczmarzMatrix.SimmetricalMatrixFilling();
+
+				KaczmarzMethod(KaczmarzMatrix, Epsilon);
+
+				break;
+
+			case 3:
+
+				KaczmarzMatrix.HilbertMatrixFilling();
+
+				KaczmarzMethod(KaczmarzMatrix, Epsilon);
+
+				break;
+
+			case 4:
+
+				cin >> KaczmarzMatrix;
+
+				KaczmarzMethod(KaczmarzMatrix, Epsilon);;
+
+				break;
+			}
+		}
+
+		if (NumberOfMethod == 3)
+		{
+			cout << setw(50) << "Jacobi Rotation Method\n" << endl;
+
+			cout << "Input the size of matrix (N x N) : ";
+
+			cin >> Height >> Length;
+
+			Matrix JacobiMatrix(Height, Length);
+
+			cout << endl;
+
+			cout << "Press \"1\" to fill matrix simmetrically\nPress \"2\" to fill matrix by yourself\n" << endl;
+
+			cout << "Input the type of filling : ";
+
+			cin >> TypeOfFilling;
+
+			cout << endl;
+
+			cout << "Input the value of epsilon : ";
+
+			cin >> Epsilon;
+
+			cout << endl;
+
+			switch (TypeOfFilling)
+			{
+			case 1:
+
+				JacobiMatrix.SimmetricalMatrixFilling();
+
+				JakobiRotationMethod(JacobiMatrix, Epsilon);
+
+				break;
+
+			case 2:
+
+				cin >> JacobiMatrix;
+
+				JakobiRotationMethod(JacobiMatrix, Epsilon);;
+
+				break;
+			}
+		}
+
+		if (NumberOfMethod == 4)
+		{
+			cout << setw(50) << "Linear Regression Method\n" << endl;
+
+			cout << "Input the length of vector : ";
+
+			cin >> Length;
+
+			Matrix LinearVector(1, Length);
+
+			cout << endl;
+
+			cin >> LinearVector;
+
+			cout << "Input the number of samples : ";
+
+			cin >> NumberOfSamples;
+
+			cout << endl;
+
+			Matrix Samples(NumberOfSamples, Length);
+
+			Samples = LinearRegressionMatrixFilling(LinearVector, NumberOfSamples);
+
+			cout << Samples << endl;
+
+			LinearRegression(Samples);
 		}
 	}
 
